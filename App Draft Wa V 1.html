@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Ta'lim WA</title>
+    <!-- Memuat Tailwind CSS untuk Styling Responsif dan Modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================= */
+        /* FIX KRITIS: Mencegah Scrolling Horizontal */
+        /* ================================================= */
+        body, html {
+            overflow-x: hidden !important; /* Mencegah scrolling ke kanan/kiri */
+            width: 100%; /* Memastikan lebar sesuai viewport */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fffb; 
+        }
+        .container-app {
+            width: 100%; /* Gunakan lebar 100% dari body */
+            max-width: 100%;
+            padding: 1rem;
+            /* Tambahkan padding bawah yang sangat besar agar konten tidak tertutup FAB */
+            padding-bottom: 100px; 
+            min-height: 100vh;
+        }
+        @media (min-width: 768px) {
+            .container-app {
+                max-width: 900px; /* Batasi lebar di desktop */
+                padding: 2rem;
+                padding-bottom: 100px;
+            }
+        }
+        /* Styling untuk Tombol Floating Action (FAB) - Fixed */
+        #fabButton {
+            position: fixed;
+            bottom: 2rem;
+            right: 1.5rem;
+            width: 60px;
+            height: 60px;
+            background-color: #059669; /* Green-600 */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+            z-index: 50;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        #fabButton:active {
+            transform: scale(0.95);
+        }
+        
+        /* Styling untuk Tombol Pengaturan (Pindah Data) - FIXED POSITION BARU */
+        #advancedToggleBtn {
+            transition: all 0.2s;
+            position: fixed; /* Dijadikan fixed */
+            top: 1rem;
+            right: 1.5rem; /* Menyesuaikan dengan FAB */
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ecfdf5; 
+            border: 1px solid #d1fae5;
+            color: #047857;
+            z-index: 60; 
+        }
+        #advancedToggleBtn:hover {
+            background-color: #d1fae5;
+        }
+        
+        /* Styling untuk tombol sortir ikon */
+        #sortButton {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .btn-shadow {
+            transition: all 0.2s;
+            box-shadow: 0 4px 0px rgba(4, 120, 87, 0.7); 
+        }
+        .btn-shadow:active {
+            box-shadow: 0 1px 0px rgba(4, 120, 87, 0.7);
+            transform: translateY(3px);
+        }
+        .btn-action-wa {
+            background-color: #25d366; 
+            box-shadow: 0 4px 0 #128c7e;
+            color: white;
+            font-size: 1.1rem;
+        }
+        .btn-action-wa:active {
+            box-shadow: 0 1px 0 #128c7e;
+            transform: translateY(3px);
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            max-height: 250px;
+            object-fit: contain;
+        }
+
+        .input-style {
+            border: 1px solid #d1fae5; 
+            background-color: #ecfdf5; 
+            transition: border-color 0.15s;
+        }
+        .input-style:focus {
+            border-color: #047857; 
+            outline: none;
+            box-shadow: 0 0 0 1px #047857;
+        }
+        
+        /* Fix: Z-INDEX UNTUK POP-UP (Modal) */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+            transition: opacity 0.3s ease-in-out;
+            z-index: 100; 
+        }
+        .modal-content {
+            max-height: 90vh; 
+            overflow-y: auto; 
+            z-index: 101; 
+        }
+        
+        .draft-card {
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .draft-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* FIX: Snippet hanya 2 baris */
+        .snippet-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* FIX: TAMPILAN GAMBAR PADA CARD */
+        .card-image-container {
+            width: 100%;
+            height: 100px; 
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            transition: transform 0.2s;
+        }
+        .draft-card:hover .card-image {
+            transform: scale(1.05);
+        }
+        .tooltip-text {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sort-btn-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .category-button {
+            transition: background-color 0.2s, color 0.2s, transform 0.1s;
+        }
+        .category-button:hover {
+            background-color: #a7f3d0;
+        }
+        .category-button.active {
+            background-color: #059669; /* emerald-600 */
+            color: white;
+            font-weight: bold;
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.5);
+        }
+        .category-button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center">
+
+    <!-- Kontainer utama memastikan konten bisa di-scroll secara independen -->
+    <div class="container-app w-full bg-white md:mt-10 rounded-xl shadow-2xl">
+        <header class="pb-6 border-b border-gray-100 mb-6">
+            <h1 class="text-3xl font-extrabold text-green-900 text-center">Draft Ta'lim WA</h1>
+            <!-- Ruang kosong agar konten tidak tertutup tombol pengaturan -->
+            <div class="h-10 md:h-0"></div> 
+        </header>
+        
+        <!-- ============================================== -->
+        <!-- TOMBOL PENGATURAN (Icon Baru) - FIXED POSITION -->
+        <!-- ============================================== -->
+        <button id="advancedToggleBtn" class="rounded-full flex items-center justify-center group" title="Pengaturan Data">
+            <!-- Icon Gear / Cog untuk Pengaturan -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35-.68.164-1.18 1.144-1.064 2.573.94 1.543-.826 3.31-2.37-2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35.68-.164 1.18-1.144 1.064-2.573-.94-1.543.826 3.31-2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+
+        <!-- ============================================== -->
+        <!-- PANEL PENCARIAN & SORTING -->
+        <!-- ============================================== -->
+        <section class="mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100 shadow-inner">
+            <h2 class="text-lg font-extrabold text-emerald-800 mb-3">🔍 Kelola Draft</h2>
+            <div class="flex flex-row gap-3 items-center mb-4">
+                <input type="text" id="searchInput" oninput="filterAndSortDrafts()" placeholder="Cari Judul, Hari, atau Tema..."
+                    class="flex-grow p-2 input-style rounded-lg">
+
+                <!-- Tombol Sort dengan Ikon -->
+                <div class="sort-btn-container relative">
+                    <button id="sortButton" onclick="toggleSortMode()" title="Ganti Urutan Tanggal"
+                            class="btn-shadow flex-shrink-0 py-2 px-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition">
+                         <!-- Icon Panah (Default: Terdekat/Kecil ke Besar) -->
+                         <svg id="sortIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l4-4m0 0l4 4m-4-4v12m-4 5h8"></path></svg>
+                    </button>
+                    <!-- Tooltip untuk kejelasan -->
+                    <span id="sortTooltip" class="tooltip-text">Urutkan: Tanggal Terdekat</span>
+                </div>
+            </div>
+            
+            <!-- Tombol Filter Kategori -->
+            <div id="categoryFilters" class="flex flex-wrap gap-2 pt-2 border-t border-emerald-200">
+                <!-- Buttons will be dynamically added here -->
+            </div>
+
+            <p class="text-xs text-gray-500 mt-2">Draft dengan Hari & Pekan ke- dan Jam terisi akan diprioritaskan (grace period 45 menit).</p>
+        </section>
+        
+        <!-- ============================================== -->
+        <!-- DAFTAR DRAFT UTAMA (Grid 2 Kolom) -->
+        <!-- ============================================== -->
+        <section>
+            <h2 class="text-xl font-extrabold text-green-800 mb-5">📤 Siap Kirim (Tap untuk Detail)</h2>
+            <div id="draftList" class="grid grid-cols-2 gap-4">
+                <!-- Data Draft akan dimuat di sini -->
+                <div id="loadingIndicator" class="col-span-2 text-center text-gray-500 p-4">Memuat data...</div>
+                <div id="emptyMessage" class="col-span-2 text-center text-gray-500 p-4 hidden">Belum ada draft tersimpan. Klik tombol (+) untuk membuat baru.</div>
+            </div>
+        </section>
+
+        <!-- Pesan Status -->
+        <div id="messageBox" class="fixed bottom-4 right-4 bg-emerald-600 text-white p-3 rounded-xl shadow-xl hidden transition-opacity duration-300 z-50"></div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- FLOATING ACTION BUTTON (FAB) - FIXED POSITION -->
+    <!-- ============================================== -->
+    <button id="fabButton" class="rounded-full flex items-center justify-center text-white text-3xl font-bold" title="Buat Draft Baru">
+        +
+    </button>
+
+    <!-- ============================================== -->
+    <!-- MODAL 1: Form Draft Baru / Edit -->
+    <!-- ============================================== -->
+    <div id="draftModal" class="fixed inset-0 modal-backdrop hidden justify-center items-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg modal-content relative">
+            <header class="p-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-xl z-10 flex justify-between items-center">
+                 <h2 id="modalTitle" class="text-xl font-extrabold text-emerald-800">📝 Buat Draft Baru</h2>
+                 <button onclick="closeModal('draftModal')" class="text-gray-400 hover:text-gray-700 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                 </button>
+            </header>
+
+            <div class="p-5 bg-emerald-50 border-b border-emerald-100">
+                 <form id="draftForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="draftId">
+                    
+                    <!-- Judul Draft -->
+                    <div class="md:col-span-2">
+                        <label for="title" class="block text-sm font-semibold text-gray-700">Nama Draft:</label>
+                        <input type="text" id="title" required placeholder="Tulis nama draft di sini"
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    
+                    <!-- Kategori -->
+                    <div>
+                        <label for="category" class="block text-sm font-semibold text-gray-700">Kategori Pesan:</label>
+                        <select id="category" required
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="Pengumuman Ta'lim">Pengumuman Ta'lim</option>
+                            <option value="Info Kajian">Info Kajian</option>
+                            <option value="Live Streaming">Live Streaming</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Input Hari (Opsional) -->
+                    <div>
+                        <label for="hari" class="block text-sm font-semibold text-gray-700">Hari (Opsional):</label>
+                        <select id="hari"
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="">-- Pilih Hari --</option>
+                            <option value="Ahad">Ahad</option>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Input Pekan Ke- (Opsional) -->
+                    <div>
+                        <label for="pekanKe" class="block text-sm font-semibold text-gray-700">Pekan ke- (1-5, Opsional):</label>
+                        <input type="number" id="pekanKe" min="1" max="5" placeholder="1"
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    
+                    <!-- Input Jam (BARU - Opsional) -->
+                    <div>
+                        <label for="jam" class="block text-sm font-semibold text-gray-700">Jam (Opsional):</label>
+                        <input type="time" id="jam" 
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    
+                    <!-- Input Tanggal Rencana (Manual) -->
+                    <div class="md:col-span-2">
+                        <label for="tanggalRencana" class="block text-sm font-semibold text-gray-700">Tanggal Rencana (Opsional):</label>
+                        <input type="date" id="tanggalRencana"
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    
+                    <!-- Teks Pesan -->
+                    <div class="md:col-span-2">
+                        <label for="messageText" class="block text-sm font-semibold text-gray-700">Isi Pesan:</label>
+                        <textarea id="messageText" rows="6" required placeholder="Masukkan isi pesan di sini. Gunakan [Tanggal Masehi] dan [Tanggal Hijriyyah] untuk placeholder otomatis."
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                    </div>
+
+                    <!-- Input Target WA (Baru) -->
+                    <div class="md:col-span-2 border-t pt-4 border-emerald-200">
+                        <label for="targetWaId" class="block text-sm font-extrabold text-emerald-800">Target WA Langsung (Opsional):</label>
+                        <input type="text" id="targetWaId" placeholder="ID Grup (JID) atau Nomor HP (cth: 6281234567890)"
+                            class="mt-1 block w-full px-4 py-2 input-style rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                        <p class="text-xs text-gray-500 mt-1">Isi dengan ID Grup WA (JID) atau Nomor HP Lengkap tanpa tanda + atau 0 (diawali kode negara, cth: 628...). Jika ini diisi, draft akan langsung dikirim ke tujuan ini.</p>
+                    </div>
+
+                    <!-- Gambar -->
+                    <div class="md:col-span-2">
+                        <label for="imageFile" class="block text-sm font-semibold text-gray-700">Pilih Gambar (Maks. 1MB, Opsional):</label>
+                        <input type="file" id="imageFile" accept="image/png, image/jpeg"
+                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-bold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200"/>
+                        
+                        <div id="currentImagePreview" class="mt-4 hidden bg-white p-4 rounded-lg border border-gray-200 shadow">
+                            <p class="text-sm font-medium text-gray-600 mb-2">Gambar Saat Ini:</p>
+                            <img id="imagePreviewImg" class="image-preview rounded-md mx-auto" alt="Preview Gambar Draft"/>
+                            <button type="button" id="removeImageBtn" class="mt-3 w-full text-sm py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 btn-shadow">Hapus Gambar</button>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Simpan -->
+                    <div class="md:col-span-2 mt-4">
+                        <button type="submit" id="submitButton"
+                                class="btn-shadow w-full py-3 px-4 rounded-xl font-extrabold text-white bg-green-700 hover:bg-green-800">
+                            ✅ Simpan Draft Baru
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL 2: TAMPILAN DETAIL DRAFT (Saat Grid Card Diklik) -->
+    <!-- ============================================== -->
+    <div id="detailModal" class="fixed inset-0 modal-backdrop hidden justify-center items-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg modal-content relative">
+            <header class="p-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-xl z-10 flex justify-between items-center">
+                 <h2 id="detailTitle" class="text-xl font-extrabold text-emerald-800">Detail Draft</h2>
+                 <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-gray-700 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                 </button>
+            </header>
+
+            <div class="p-5">
+                <div id="detailImageContainer" class="mb-4 hidden bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                    <img id="detailImage" class="image-preview rounded-md mx-auto shadow-md" alt="Gambar Draft Penuh"/>
+                </div>
+
+                <div class="mb-4">
+                    <p class="text-sm font-semibold text-gray-500">Kategori / Jadwal:</p>
+                    <p id="detailCategory" class="text-base font-bold text-green-700"></p>
+                </div>
+                
+                <div class="mb-6">
+                    <p class="text-sm font-semibold text-gray-500">Isi Pesan Lengkap:</p>
+                    <div id="detailText" class="bg-gray-50 p-4 rounded-lg text-gray-800 whitespace-pre-wrap border border-gray-200"></div>
+                </div>
+
+                <div id="detailTargetInfo" class="mb-4 p-3 bg-red-50 text-red-700 text-sm font-semibold rounded-lg border border-red-200 hidden">
+                    🎯 Kirim Langsung ke: <span id="detailTargetWaIdDisplay"></span>
+                </div>
+
+                <div id="detailActionButtons" class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <!-- Tombol Aksi Paling Penting: Kirim WA -->
+                    <button id="detailCopyBtn" 
+                            class="btn-action-wa w-full py-3 px-3 font-extrabold rounded-xl transition hover:bg-emerald-700"
+                            onclick="handleWaSendAndDownload(event)">
+                        1. KIRIM KE WA & UNDUH GAMBAR
+                    </button>
+                </div>
+                
+                <div class="flex flex-row space-x-2 mt-2">
+                    <!-- Tombol Duplikat BARU -->
+                    <button id="detailDuplicateBtn" 
+                            class="duplicate-btn btn-shadow w-full sm:w-1/3 py-3 px-3 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700">
+                        🔗 Duplikat Draft
+                    </button>
+                    <button id="detailEditBtn" 
+                            class="edit-btn btn-shadow w-full sm:w-1/3 py-3 px-3 text-sm font-medium text-white bg-yellow-600 rounded-xl hover:bg-yellow-700">
+                        ✏️ Edit
+                    </button>
+                    <button id="detailDeleteBtn" 
+                            class="delete-btn btn-shadow w-full sm:w-1/3 py-3 px-3 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700">
+                        🗑️ Hapus
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================== -->
+    <!-- MODAL 3: MODAL PINDAH DATA (Export/Import) -->
+    <!-- ============================================== -->
+    <div id="advancedModal" class="fixed inset-0 modal-backdrop hidden justify-center items-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg modal-content relative">
+            <header class="p-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-xl z-10 flex justify-between items-center">
+                 <h2 class="text-xl font-extrabold text-emerald-800">🗄️ Pindah Data (Export/Import)</h2>
+                 <button onclick="closeModal('advancedModal')" class="text-gray-400 hover:text-gray-700 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                 </button>
+            </header>
+
+            <div class="p-5 bg-gray-50">
+                <p class="text-sm text-gray-600 mb-4">Gunakan fitur ini untuk memindahkan draft ke perangkat lain atau membaginya dengan anggota tim.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <!-- Export -->
+                    <div>
+                        <button type="button" onclick="handleExport()"
+                                class="btn-shadow w-full py-3 px-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700">
+                            ⬇️ Export Data (JSON)
+                        </button>
+                        <p class="text-xs text-gray-500 mt-1 text-center">Unduh semua draft ke file JSON.</p>
+                    </div>
+
+                    <!-- Import -->
+                    <div>
+                        <input type="file" id="importFile" accept=".json" class="hidden" onchange="handleImport(event)"/>
+                        <button type="button" onclick="document.getElementById('importFile').click()"
+                                class="btn-shadow w-full py-3 px-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700">
+                            ⬆️ Import Data (JSON)
+                        </button>
+                        <p class="text-xs text-gray-500 mt-1 text-center">Muat data dari file JSON yang dibagikan (Akan menimpa semua data lama).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // =================================================================
+        // Konfigurasi IndexedDB
+        // =================================================================
+
+        const DB_NAME = 'TalimDraftsWA';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'drafts';
+        const GRACE_PERIOD_MS = 45 * 60 * 1000; // 45 menit
+        const NO_DATE_SENTINEL_SORT = Number.MAX_SAFE_INTEGER; // Prioritas Terendah (Tidak Ada Jadwal)
+        const PASSED_GRACE_SENTINEL_SORT = Number.MAX_SAFE_INTEGER / 2; // Prioritas Rendah (Sudah Lewat Grace Period)
+
+        let db;
+        let isSortedByDate = true; // Status sort: true = Terdekat, false = Terjauh
+        let currentCategoryFilter = 'Semua Kategori'; // State filter kategori
+
+        const categoryButtons = [
+            'Semua Kategori', 
+            'Pengumuman Ta\'lim', 
+            'Info Kajian', 
+            'Live Streaming', 
+            'Lainnya'
+        ];
+
+        const draftModal = document.getElementById('draftModal');
+        const detailModal = document.getElementById('detailModal');
+        const advancedModal = document.getElementById('advancedModal');
+        const fabButton = document.getElementById('fabButton');
+        const advancedToggleBtn = document.getElementById('advancedToggleBtn');
+        const form = document.getElementById('draftForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const draftList = document.getElementById('draftList');
+        const submitButton = document.getElementById('submitButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const messageBox = document.getElementById('messageBox');
+        const imageFile = document.getElementById('imageFile');
+        const currentImagePreview = document.getElementById('currentImagePreview');
+        const imagePreviewImg = document.getElementById('imagePreviewImg');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const sortButton = document.getElementById('sortButton');
+        const sortIcon = document.getElementById('sortIcon');
+        const sortTooltip = document.getElementById('sortTooltip');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFiltersContainer = document.getElementById('categoryFilters');
+        
+        // Elemen Detail Modal
+        const detailTitle = document.getElementById('detailTitle');
+        const detailCategory = document.getElementById('detailCategory');
+        const detailText = document.getElementById('detailText');
+        const detailImage = document.getElementById('detailImage');
+        const detailImageContainer = document.getElementById('detailImageContainer');
+        const detailCopyBtn = document.getElementById('detailCopyBtn');
+        const detailEditBtn = document.getElementById('detailEditBtn');
+        const detailDeleteBtn = document.getElementById('detailDeleteBtn');
+        const detailDuplicateBtn = document.getElementById('detailDuplicateBtn');
+        const detailTargetInfo = document.getElementById('detailTargetInfo'); 
+        const detailTargetWaIdDisplay = document.getElementById('detailTargetWaIdDisplay'); 
+
+
+        let allDraftsCache = []; // Cache untuk menyimpan semua data draft
+        let currentBase64Image = null; 
+        const MAX_IMAGE_SIZE_MB = 1;
+        
+        // Pemetaan Hari untuk Kalkulasi Tanggal (0=Ahad, 1=Senin, ..., 6=Sabtu)
+        const dayMap = {
+            'Ahad': 0, 'Senin': 1, 'Selasa': 2, 'Rabu': 3,
+            'Kamis': 4, 'Jumat': 5, 'Sabtu': 6
+        };
+        const dayNameMap = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        
+        // =================================================================
+        // HIJRIYAH CALCULATION LOGIC (BARU)
+        // Sumber: Algoritma Sederhana Hijriyah (Modifikasi dari Kalender Ummul Qura/Taqwim Saudi)
+        // Ini adalah implementasi sederhana dan mungkin memiliki deviasi 1 hari dari kalender lokal.
+        // =================================================================
+
+        const H_MONTHS = ["Muharram", "Shafar", "Rabi'ul Awwal", "Rabi'ul Akhir", "Jumadil Awwal", "Jumadil Akhir", "Rajab", "Sya'ban", "Ramadhan", "Syawwal", "Dzulqa'dah", "Dzulhijjah"];
+
+        // Fungsi konversi Masehi ke Julian Day (JD)
+        function gregorianToJulianDay(year, month, day) {
+            if (month <= 2) {
+                year -= 1;
+                month += 12;
+            }
+            const A = Math.floor(year / 100);
+            const B = 2 + Math.floor(A / 4) - A;
+            return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + B - 1524.5;
+        }
+
+        // Fungsi konversi Julian Day ke Hijriyah (Menggunakan Algoritma Konvensional)
+        function julianDayToHijri(jd) {
+            const BASE_JD = 1948439.5; // Titik awal 1 Muharram 1 H (Jumat, 16 Juli 622 M - versi konvensional)
+            const jdOffset = jd - BASE_JD;
+            
+            // Perkiraan kasar tahun Hijriyah
+            const H_YEAR_AVG = Math.floor(jdOffset / 354.367056) + 1; // 354.367056 rata-rata hari dlm tahun hijriyah
+
+            let dayNo = 0;
+            let h_year = H_YEAR_AVG - 1; 
+
+            // Hitung JD awal tahun Hijriyah
+            let jdStartYear = 0;
+            const isLeap = (y) => (y * 11 + 14) % 30 < 11; // Simple Hijri Leap year check (30-year cycle)
+
+            do {
+                h_year++;
+                // Perkiraan JD start untuk tahun H_YEAR
+                // JD start adalah JD - offset ke JD start. Kita perlu JD start yang akurat.
+                
+                // Iterasi maju dari BASE_JD untuk menemukan JD awal tahun Hijriyah
+                jdStartYear = BASE_JD; 
+                for (let y = 1; y < h_year; y++) {
+                    jdStartYear += isLeap(y) ? 355 : 354;
+                }
+                
+                dayNo = jd - jdStartYear;
+            } while (dayNo > 355);
+
+            // Tentukan Bulan dan Tanggal
+            let h_month = 0;
+            let monthLength = 0;
+
+            for (let i = 0; i < 12; i++) {
+                // Panjang bulan di tahun Hijriyah (alternatif 30/29 hari, Dzulhijjah 30 jika kabisat)
+                monthLength = (i % 2 === 0) ? 30 : 29;
+                if (i === 11 && isLeap(h_year)) { // Dzulhijjah tahun kabisat
+                    monthLength = 30; 
+                }
+                
+                if (dayNo < monthLength) {
+                    h_month = i;
+                    break;
+                }
+                dayNo -= monthLength;
+            }
+            
+            return {
+                day: Math.floor(dayNo) + 1, // dayNo dimulai dari 0
+                month: H_MONTHS[h_month],
+                year: h_year
+            };
+        }
+
+        /** Mendapatkan string tanggal Hijriyah hari ini. */
+        function getHijriDateString(date) {
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+
+            const jd = gregorianToJulianDay(year, month, day);
+            const hijri = julianDayToHijri(jd);
+            
+            // Format output: DD Bulan YYYY H
+            return `${hijri.day} ${hijri.month} ${hijri.year} H`;
+        }
+
+        // =================================================================
+        // END HIJRIYAH CALCULATION LOGIC
+        // =================================================================
+
+
+        /** Mengubah format tanggal dari YYYY-MM-DD menjadi DD MMMM YYYY */
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            try {
+                // Menambahkan 'T00:00:00' untuk menghindari masalah zona waktu pada parsing
+                return new Date(dateString + 'T00:00:00').toLocaleDateString('id-ID', options);
+            } catch {
+                return dateString;
+            }
+        }
+        
+        /** Menghitung tanggal terdekat berikutnya berdasarkan Hari, Pekan ke-, dan Jam. */
+        function calculateNextRecurringDate(dayName, weekNumber, timeString) {
+            if (!dayName || !weekNumber || isNaN(parseInt(weekNumber))) return null;
+
+            const targetDay = dayMap[dayName];
+            const N = parseInt(weekNumber);
+            if (targetDay === undefined) return null;
+
+            const today = new Date();
+            const [hours, minutes] = timeString ? timeString.split(':').map(Number) : [0, 0];
+            
+            const checkTime = (date, hours, minutes) => {
+                date.setHours(hours, minutes, 0, 0);
+                return date;
+            };
+
+            const findNthDay = (year, month, targetDay, weekN) => {
+                let date = new Date(year, month, 1);
+                let count = 0;
+
+                while (date.getMonth() === month) {
+                    if (date.getDay() === targetDay) {
+                        count++;
+                        if (count === weekN) {
+                            return date;
+                        }
+                    }
+                    date.setDate(date.getDate() + 1);
+                }
+                return null;
+            };
+
+            const checkMonth = (monthOffset) => {
+                const checkDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+                let nextDate = findNthDay(checkDate.getFullYear(), checkDate.getMonth(), targetDay, N);
+
+                if (nextDate) {
+                    nextDate = checkTime(nextDate, hours, minutes);
+                    
+                    if (monthOffset === 0 && nextDate.getTime() + GRACE_PERIOD_MS < today.getTime()) {
+                         return null; // Akan dicoba bulan depan
+                    }
+                    return nextDate;
+                }
+                return null;
+            }
+            
+            // Coba bulan ini, bulan depan, dan dua bulan ke depan
+            for (let i = 0; i < 3; i++) {
+                let nextDate = checkMonth(i);
+                if (nextDate) {
+                    const y = nextDate.getFullYear();
+                    const m = String(nextDate.getMonth() + 1).padStart(2, '0');
+                    const d = String(nextDate.getDate()).padStart(2, '0');
+                    const h = String(nextDate.getHours()).padStart(2, '0');
+                    const min = String(nextDate.getMinutes()).padStart(2, '0');
+                    return `${y}-${m}-${d}T${h}:${min}:00`;
+                }
+            }
+
+            return null; 
+        }
+
+
+        /** Menampilkan pesan status di pojok kanan bawah. */
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.className = `fixed bottom-4 right-4 p-4 rounded-xl shadow-2xl transition-opacity duration-300 z-50 text-white font-semibold ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            messageBox.classList.remove('hidden');
+            messageBox.style.opacity = '1';
+
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+                setTimeout(() => { messageBox.classList.add('hidden'); }, 300);
+            }, 3500);
+        }
+
+        /** Membuka koneksi ke IndexedDB. */
+        async function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = (event) => {
+                    console.error("IndexedDB Error:", event.target.error);
+                    showMessage("Gagal membuka database.", 'error');
+                    reject(event.target.error);
+                };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        objectStore.createIndex('category', 'category', { unique: false });
+                        objectStore.createIndex('tanggalRencana', 'tanggalRencana', { unique: false });
+                    }
+                };
+            });
+        }
+
+        /** Konversi file gambar menjadi Base64. */
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+                    reject(new Error(`Ukuran file melebihi batas ${MAX_IMAGE_SIZE_MB}MB.`));
+                    return;
+                }
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        /** Menyimpan/Mengupdate draft. */
+        async function saveDraft(draft) {
+            if (!db) { await openDatabase(); }
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(draft);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        /** Mengambil semua draft. */
+        function getAllDrafts() {
+            return new Promise((resolve, reject) => {
+                if (!db) { resolve([]); return; }
+                const store = db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME);
+                const request = store.getAll();
+
+                request.onsuccess = () => {
+                    resolve(request.result);
+                };
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        /** Mengambil draft berdasarkan ID. */
+        function getDraftById(id) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject(new Error("Database belum terbuka.")); return; }
+                const store = db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME);
+                const request = store.get(parseInt(id));
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        /** Menghapus draft. */
+        function deleteDraft(id) {
+             return new Promise((resolve, reject) => {
+                if (!db) { reject(new Error("Database belum terbuka.")); return; }
+                const store = db.transaction([STORE_NAME], 'readwrite').objectStore(STORE_NAME);
+                const request = store.delete(id);
+
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+        
+        /** Fungsi untuk mengatur filter kategori. */
+        window.setCategoryFilter = (category) => {
+            currentCategoryFilter = category;
+            
+            // Update tampilan tombol aktif
+            document.querySelectorAll('.category-button').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            filterAndSortDrafts();
+        };
+        
+        /** Render tombol-tombol filter kategori. */
+        function renderCategoryFilters() {
+            categoryFiltersContainer.innerHTML = '';
+            categoryButtons.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.dataset.category = category;
+                button.className = 'category-button px-3 py-1 text-sm rounded-full bg-emerald-100 text-emerald-800';
+                button.onclick = () => setCategoryFilter(category);
+                
+                if (category === currentCategoryFilter) {
+                    button.classList.add('active');
+                }
+
+                categoryFiltersContainer.appendChild(button);
+            });
+        }
+
+
+        // =================================================================
+        // FUNGSI UTAMA (WA ACTION & UI RENDER)
+        // =================================================================
+
+        /** Mengurutkan dan menyaring draft. */
+        async function filterAndSortDrafts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const today = new Date();
+            const nowTime = today.getTime();
+
+            let displayDrafts = allDraftsCache.map(draft => {
+                // 1. Tambahkan/Ganti Tanggal Rencana dengan Tanggal Berulang jika ada
+                let effectiveDateString = null;
+                
+                // Prioritas 1: Tanggal Berulang (Hari, Pekan, Jam)
+                if (draft.hari && draft.pekanKe) {
+                    effectiveDateString = calculateNextRecurringDate(draft.hari, draft.pekanKe, draft.jam);
+                } 
+                
+                // Prioritas 2: Tanggal Manual (Tanggal & Jam)
+                else if (draft.tanggalRencana) {
+                    const datePart = draft.tanggalRencana; // YYYY-MM-DD
+                    const timePart = draft.jam || "00:00"; // HH:mm
+                    effectiveDateString = `${datePart}T${timePart}:00`;
+                }
+
+                return { ...draft, effectiveDateString };
+            });
+
+            // 2. Filtering
+            displayDrafts = displayDrafts.filter(draft => {
+                // Filter Kategori
+                if (currentCategoryFilter !== 'Semua Kategori' && draft.category !== currentCategoryFilter) {
+                    return false;
+                }
+
+                // Filter Pencarian
+                if (searchTerm) {
+                    const searchString = `${draft.title} ${draft.category} ${draft.text} ${draft.hari || ''} pekan ${draft.pekanKe || ''} ${draft.jam || ''} ${draft.targetWaId || ''} ${formatDate(draft.tanggalRencana)}`.toLowerCase();
+                    return searchString.includes(searchTerm);
+                }
+                
+                return true;
+            });
+
+            // 3. Sorting (Berdasarkan Effective Date dengan Grace Period 45 Menit)
+            displayDrafts.sort((a, b) => {
+                
+                const getSortValue = (draft) => {
+                    if (!draft.effectiveDateString) {
+                        // No Date: Prioritas paling rendah
+                        return NO_DATE_SENTINEL_SORT; 
+                    }
+
+                    const scheduledTime = new Date(draft.effectiveDateString);
+                    const scheduledTimeMs = scheduledTime.getTime();
+                    const graceEndMs = scheduledTimeMs + GRACE_PERIOD_MS;
+                    
+                    if (nowTime > graceEndMs) {
+                        // Passed Grace Period: Prioritas rendah, tapi di atas 'No Date'
+                        return PASSED_GRACE_SENTINEL_SORT; 
+                    }
+
+                    // Active/Future Draft: Sort berdasarkan kedekatan waktu (semakin kecil diff, semakin dekat)
+                    return scheduledTimeMs - nowTime;
+                };
+
+                const diffA = getSortValue(a);
+                const diffB = getSortValue(b);
+                
+                // Sort: true = Terdekat (diff terkecil ke terbesar). false = Terjauh (diff terbesar ke terkecil)
+                if (isSortedByDate) {
+                    // Sorting Ascending
+                    return diffA - diffB;
+                } else {
+                    // Sorting Descending
+                    return diffB - diffA; 
+                }
+            });
+
+            renderDrafts(displayDrafts);
+        }
+
+        /** Toggle mode sorting (Terdekat vs Terjauh) */
+        window.toggleSortMode = () => {
+            isSortedByDate = !isSortedByDate;
+            
+            // Update Icon dan Tooltip
+            if (isSortedByDate) {
+                sortIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l4-4m0 0l4 4m-4-4v12m-4 5h8"></path>`;
+                sortTooltip.textContent = 'Urutkan: Tanggal Terdekat';
+            } else {
+                sortIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l-4 4m0 0l-4-4m4 4V9m4-5H8"></path>`;
+                sortTooltip.textContent = 'Urutkan: Tanggal Terjauh';
+            }
+            filterAndSortDrafts(); 
+        };
+
+        /** Merender daftar draft ke UI dalam format Grid 2 Kolom. */
+        function renderDrafts(drafts) {
+            draftList.innerHTML = '';
+            loadingIndicator.classList.add('hidden');
+            
+            if (drafts.length === 0) { emptyMessage.classList.remove('hidden'); } 
+            else { emptyMessage.classList.add('hidden'); }
+
+            drafts.forEach(draft => {
+                const draftDiv = document.createElement('div');
+                draftDiv.className = 'draft-card bg-white rounded-xl shadow-md border border-gray-100 flex flex-col h-full overflow-hidden';
+                draftDiv.dataset.id = draft.id;
+                
+                const snippet = draft.text.substring(0, 100).trim(); 
+                const hasMore = draft.text.length > 100;
+                
+                const displayDate = draft.effectiveDateString ? new Date(draft.effectiveDateString) : null;
+                
+                let scheduleText = draft.category;
+                const timePart = draft.jam ? ` Pukul ${draft.jam}` : '';
+                let dateDisplay = scheduleText;
+                
+                if (displayDate) {
+                     const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                     dateDisplay = displayDate.toLocaleDateString('id-ID', options);
+                } else if (draft.tanggalRencana) {
+                    dateDisplay = formatDate(draft.tanggalRencana);
+                } else {
+                    dateDisplay = 'Tanpa Jadwal';
+                }
+
+                // Cek apakah sudah lewat grace period (untuk penandaan di card)
+                let isPassedGrace = false;
+                if (displayDate) {
+                    const scheduledTimeMs = displayDate.getTime();
+                    const graceEndMs = scheduledTimeMs + GRACE_PERIOD_MS;
+                    if (Date.now() > graceEndMs) {
+                        isPassedGrace = true;
+                    }
+                }
+                
+                const badgeClass = isPassedGrace 
+                    ? 'bg-red-100 text-red-700' 
+                    : draft.targetWaId ? 'bg-orange-100 text-orange-700'
+                    : displayDate ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500';
+                
+                let badgeText = isPassedGrace ? `TERLEWAT (${dateDisplay})` : dateDisplay;
+                if (draft.targetWaId && !isPassedGrace) {
+                    badgeText = `🎯 Langsung WA`;
+                }
+
+
+                draftDiv.innerHTML = `
+                    ${draft.base64Image ? 
+                        `<div class="card-image-container">
+                            <img src="${draft.base64Image}" alt="${draft.title}" class="card-image" loading="lazy"/>
+                        </div>` : ''
+                    }
+                    <div class="p-3 flex-grow">
+                        <span class="inline-block px-2 py-0.5 text-xs font-bold rounded-full ${badgeClass} mb-2">
+                            ${badgeText}
+                        </span>
+                        <p class="text-base font-extrabold text-gray-900 mb-1 leading-tight">${draft.title}</p>
+                        <p class="text-xs text-gray-500 snippet-text">
+                            ${snippet}${hasMore ? '...' : ''}
+                        </p>
+                    </div>
+                `;
+                draftList.appendChild(draftDiv);
+            });
+
+            // Menambahkan event listener untuk membuka modal detail
+            document.querySelectorAll('.draft-card').forEach(card => {
+                card.addEventListener('click', (e) => showDraftDetail(e.currentTarget.dataset.id));
+            });
+        }
+        
+        /** Menampilkan Modal Detail Draft. */
+        async function showDraftDetail(id) {
+            const draft = await getDraftById(id);
+            if (!draft) {
+                showMessage("Draft tidak ditemukan.", 'error');
+                return;
+            }
+            
+            // Di detail modal, tampilkan teks asli (belum diganti placeholder)
+            detailTitle.textContent = draft.title;
+            detailText.textContent = draft.text; 
+            
+            // Logika Teks Jadwal di Detail
+            let scheduleDisplay = draft.category;
+            const timePart = draft.jam ? ` Pukul ${draft.jam}` : '';
+
+            if (draft.hari && draft.pekanKe) {
+                const nextDateISO = calculateNextRecurringDate(draft.hari, draft.pekanKe, draft.jam);
+                scheduleDisplay += ` | Berulang: ${draft.hari} Pekan ke-${draft.pekanKe}${timePart}`;
+                 if (nextDateISO) {
+                    const nextDate = new Date(nextDateISO);
+                    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    const formattedNextDate = nextDate.toLocaleDateString('id-ID', options);
+                    scheduleDisplay += ` (Terdekat: ${formattedNextDate})`;
+                 }
+            } else if (draft.tanggalRencana) {
+                scheduleDisplay += ` | Manual: ${formatDate(draft.tanggalRencana)}${timePart}`;
+            } else {
+                scheduleDisplay += ` | Tanpa Jadwal`;
+            }
+            
+            detailCategory.textContent = scheduleDisplay;
+
+
+            // Atur Target WA Langsung
+            if (draft.targetWaId) {
+                detailTargetWaIdDisplay.textContent = draft.targetWaId;
+                detailTargetInfo.classList.remove('hidden');
+                detailCopyBtn.textContent = `1. KIRIM LANGSUNG KE ${draft.targetWaId.length > 15 ? 'TARGET' : draft.targetWaId} & UNDUH GAMBAR`;
+            } else {
+                detailTargetWaIdDisplay.textContent = '';
+                detailTargetInfo.classList.add('hidden');
+                detailCopyBtn.textContent = '1. KIRIM KE WA (PILIH GRUP/KONTAK) & UNDUH GAMBAR';
+            }
+
+
+            // Atur Gambar
+            if (draft.base64Image) {
+                detailImage.src = draft.base64Image;
+                detailImageContainer.classList.remove('hidden');
+            } else {
+                detailImageContainer.classList.add('hidden');
+                detailImage.src = '';
+            }
+
+            // Atur Tombol Aksi
+            detailCopyBtn.dataset.id = id;
+            detailEditBtn.dataset.id = id;
+            detailDeleteBtn.dataset.id = id;
+            detailDuplicateBtn.dataset.id = id; // Set ID untuk Duplikat
+
+            // Tambahkan listener untuk Edit, Delete, dan Duplikat di modal detail
+            detailEditBtn.onclick = () => {
+                closeModal('detailModal');
+                handleEdit(id);
+            };
+            detailDeleteBtn.onclick = () => {
+                closeModal('detailModal');
+                if (window.confirm(`Anda yakin ingin menghapus draft '${draft.title}'?`)) { 
+                    handleDelete(parseInt(id));
+                }
+            };
+            detailDuplicateBtn.onclick = () => {
+                 closeModal('detailModal');
+                 handleDuplicate(parseInt(id));
+            }
+            
+            openModal('detailModal');
+        }
+
+        
+        /** FUNGSI UTAMA WA: Mengirim teks ke WhatsApp dan mengunduh gambar. */
+        window.handleWaSendAndDownload = async (event) => {
+            const id = parseInt(event.currentTarget.dataset.id);
+            closeModal('detailModal'); // Tutup modal detail setelah aksi
+
+            try {
+                const draft = await getDraftById(id);
+                if (!draft) { 
+                    showMessage("Draft tidak ditemukan.", 'error'); 
+                    return; 
+                }
+                
+                // --- BARU: GANTI PLACEHOLDER TANGGAL ---
+                const today = new Date();
+                const masehiString = today.toLocaleDateString('id-ID', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                }); // Contoh: Selasa, 5 November 2025
+                const hijriString = getHijriDateString(today); // Contoh: 13 Rabi'ul Akhir 1447 H
+
+                let finalText = draft.text;
+                finalText = finalText.replace(/\[Tanggal Masehi\]/g, masehiString);
+                finalText = finalText.replace(/\[Tanggal Hijriyyah\]/g, hijriString);
+                // --- END PLACEHOLDER REPLACEMENT ---
+
+
+                const encodedText = encodeURIComponent(finalText);
+                let waLink = '';
+
+                if (draft.targetWaId) {
+                    if (draft.targetWaId.match(/^\d+$/)) { 
+                         waLink = `https://wa.me/${draft.targetWaId}?text=${encodedText}`;
+                    } else if (draft.targetWaId.includes('@g.us') || draft.targetWaId.includes('@c.us')) {
+                         waLink = `https://api.whatsapp.com/send?chat=${draft.targetWaId}&text=${encodedText}`;
+                    } else {
+                        waLink = `https://wa.me/send?chat=${draft.targetWaId}&text=${encodedText}`;
+                    }
+                    
+                    window.open(waLink, '_blank');
+                    showMessage(`Kirim langsung ke ${draft.targetWaId} dimulai. Gambar *mulai diunduh* (jika ada).`, 'success');
+
+                } else {
+                    waLink = `https://wa.me/?text=${encodedText}`;
+                    window.open(waLink, '_blank');
+                    showMessage("Link WA dibuka, silakan pilih kontak/grup. Gambar *mulai diunduh* (jika ada).", 'success');
+                }
+                
+                // --- AKSI 2: UNDUH GAMBAR (JIKA ADA) ---
+                if (draft.base64Image) {
+                    const imageName = draft.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    downloadBase64Image(draft.base64Image, `${imageName}_${draft.id}.png`);
+                }
+
+            } catch (err) {
+                console.error('Gagal mengirim ke WA atau mengunduh:', err);
+                showMessage("Gagal melakukan aksi. Silakan coba lagi.", 'error');
+            }
+        }
+        
+        
+        /** Fungsi untuk mengunduh Base64 sebagai file. */
+        function downloadBase64Image(base64Data, filename) {
+            const link = document.createElement('a');
+            link.href = base64Data;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        /** Mengisi form untuk mode edit. */
+        async function handleEdit(id) {
+            try {
+                const draft = await getDraftById(id);
+                if (!draft) return;
+
+                document.getElementById('draftId').value = draft.id;
+                document.getElementById('category').value = draft.category;
+                document.getElementById('title').value = draft.title;
+                document.getElementById('messageText').value = draft.text;
+                document.getElementById('hari').value = draft.hari || '';
+                document.getElementById('pekanKe').value = draft.pekanKe || '';
+                document.getElementById('jam').value = draft.jam || ''; 
+                document.getElementById('tanggalRencana').value = draft.tanggalRencana || '';
+                document.getElementById('targetWaId').value = draft.targetWaId || ''; 
+                
+                currentBase64Image = draft.base64Image || null;
+
+                if (draft.base64Image) {
+                    imagePreviewImg.src = draft.base64Image;
+                    currentImagePreview.classList.remove('hidden');
+                } else {
+                    imagePreviewImg.src = '';
+                    currentImagePreview.classList.add('hidden');
+                }
+                
+                imageFile.value = ''; // Reset file input
+                submitButton.textContent = `💾 Simpan Perubahan Draft (ID: ${draft.id})`;
+                submitButton.classList.remove('bg-green-700', 'shadow-green-800');
+                submitButton.classList.add('bg-yellow-600', 'shadow-yellow-800');
+                
+                // Tampilkan Modal dalam mode Edit
+                modalTitle.textContent = "✏️ Edit Draft " + draft.title;
+                openModal('draftModal');
+            } catch (error) {
+                showMessage("Gagal memuat data draft untuk edit.", 'error');
+            }
+        }
+        
+        /** BARU: Duplikasi Draft */
+        async function handleDuplicate(id) {
+             try {
+                const draftToCopy = await getDraftById(id);
+                if (!draftToCopy) return;
+
+                // Buat salinan objek, hapus ID agar IndexedDB membuat entri baru
+                const newDraft = { 
+                    ...draftToCopy,
+                    id: undefined, // Hapus ID lama
+                    title: `${draftToCopy.title} (COPY)`,
+                    timestamp: Date.now()
+                };
+
+                const newId = await saveDraft(newDraft);
+                showMessage(`Draft berhasil diduplikasi menjadi ID ${newId}. Silakan edit.`, 'success');
+                await loadAndRenderDrafts(); // Muat ulang dan render
+                
+                // Langsung buka modal edit untuk draft yang baru diduplikasi
+                handleEdit(newId);
+
+            } catch (error) {
+                 showMessage(`Gagal menduplikasi draft: ${error.message}`, 'error');
+            }
+        }
+
+
+        /** Reset form. */
+        function resetForm() {
+            form.reset();
+            document.getElementById('draftId').value = '';
+            currentBase64Image = null; 
+            imagePreviewImg.src = '';
+            currentImagePreview.classList.add('hidden');
+            
+            submitButton.textContent = '✅ Simpan Draft Baru';
+            submitButton.classList.remove('bg-yellow-600', 'shadow-yellow-800');
+            submitButton.classList.add('bg-green-700', 'shadow-green-800');
+            modalTitle.textContent = "📝 Buat Draft Baru"; // Reset title
+        }
+
+        /** Menghapus draft. */
+        async function handleDelete(id) {
+            try {
+                await deleteDraft(id);
+                showMessage(`Draft ID ${id} berhasil dihapus.`, 'success');
+                await loadAndRenderDrafts(); // Muat ulang dari DB
+            } catch (error) {
+                 showMessage(`Gagal menghapus draft: ${error.message}`, 'error');
+            }
+        }
+        
+        /** Memuat ulang data dari DB, mengisi cache, dan merender ulang UI. */
+        async function loadAndRenderDrafts() {
+            loadingIndicator.classList.remove('hidden');
+            try {
+                allDraftsCache = await getAllDrafts(); // Isi cache
+                filterAndSortDrafts(); // Gunakan fungsi sort/filter untuk render
+                renderCategoryFilters(); // Render filter
+            } catch (error) {
+                showMessage("Gagal memuat draft dari database.", 'error');
+            }
+        }
+
+        /** Fungsi untuk membuka modal. */
+        window.openModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        /** Fungsi untuk menutup modal. */
+        window.closeModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (modalId === 'draftModal') {
+                    resetForm(); // Reset form hanya jika modal draft yang ditutup
+                }
+            }
+        }
+
+
+        // =================================================================
+        // EXPORT / IMPORT LOGIC
+        // =================================================================
+
+        /** EXPORT: Mengunduh semua data IndexedDB ke file JSON. */
+        window.handleExport = async () => {
+             try {
+                const drafts = await getAllDrafts();
+                const jsonContent = JSON.stringify(drafts, null, 2);
+                const blob = new Blob([jsonContent], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `talim_drafts_export_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showMessage(`Sukses! ${drafts.length} draft di-export ke JSON.`, 'success');
+                closeModal('advancedModal');
+            } catch (error) {
+                console.error('Export Gagal:', error);
+                showMessage('Gagal mengekspor data. Cek konsol.', 'error');
+            }
+        };
+
+        /** IMPORT: Memuat data dari file JSON ke IndexedDB. */
+        window.handleImport = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (!Array.isArray(importedData)) {
+                        throw new Error("Format file JSON tidak valid (bukan array).");
+                    }
+                    
+                    if (!window.confirm(`Anda yakin ingin mengganti semua ${allDraftsCache.length} draft yang ada dengan ${importedData.length} draft dari file ini?`)) {
+                        return;
+                    }
+
+                    // Hapus semua data lama sebelum import
+                    const transactionClear = db.transaction([STORE_NAME], 'readwrite');
+                    const storeClear = transactionClear.objectStore(STORE_NAME);
+                    await new Promise((resolve, reject) => {
+                        const clearRequest = storeClear.clear();
+                        clearRequest.onsuccess = () => resolve();
+                        clearRequest.onerror = (e) => reject(e.target.error);
+                    });
+                    
+                    // Masukkan data baru
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    
+                    for (const draft of importedData) {
+                        delete draft.id; 
+                        const request = store.add(draft);
+                        request.onerror = (e) => { 
+                            console.warn("Gagal menambahkan draft:", e.target.error, draft.title);
+                        };
+                    }
+                    
+                    transaction.oncomplete = async () => {
+                        await loadAndRenderDrafts();
+                        showMessage(`Sukses! ${importedData.length} draft berhasil di-import.`, 'success');
+                        closeModal('advancedModal');
+                    };
+                    transaction.onerror = (e) => { throw new Error(e.target.error); };
+
+                } catch (error) {
+                    console.error('Import Gagal:', error);
+                    showMessage(`Gagal mengimpor data: ${error.message}.`, 'error');
+                } finally {
+                    // Pastikan file input direset agar file yang sama bisa di-upload lagi
+                    document.getElementById('importFile').value = '';
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // =================================================================
+        // Event & Init
+        // =================================================================
+
+        // Event listener untuk Tombol Pengaturan
+        advancedToggleBtn.addEventListener('click', () => {
+            openModal('advancedModal');
+        });
+
+        // Event listener untuk FAB
+        fabButton.addEventListener('click', () => {
+            resetForm(); // Pastikan form dalam mode 'Draft Baru'
+            openModal('draftModal');
+        });
+
+        // Event listener untuk Pencarian
+        searchInput.addEventListener('input', filterAndSortDrafts);
+
+        // Event listener untuk Modal Backdrop (menutup saat klik luar)
+        draftModal.addEventListener('click', (e) => {
+            if (e.target === draftModal) {
+                closeModal('draftModal');
+            }
+        });
+
+        detailModal.addEventListener('click', (e) => {
+            if (e.target === detailModal) {
+                closeModal('detailModal');
+            }
+        });
+
+        advancedModal.addEventListener('click', (e) => {
+            if (e.target === advancedModal) {
+                closeModal('advancedModal');
+            }
+        });
+
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('draftId').value ? parseInt(document.getElementById('draftId').value) : null;
+            const category = document.getElementById('category').value;
+            const title = document.getElementById('title').value.trim();
+            const text = document.getElementById('messageText').value;
+            
+            const hari = document.getElementById('hari').value;
+            const pekanKeRaw = document.getElementById('pekanKe').value;
+            const pekanKe = pekanKeRaw ? parseInt(pekanKeRaw) : null;
+            const jam = document.getElementById('jam').value; 
+            const tanggalRencana = document.getElementById('tanggalRencana').value;
+            const targetWaId = document.getElementById('targetWaId').value.trim(); 
+            
+            // Validasi: Jika Hari diisi, Pekan Ke- harus diisi (atau sebaliknya, jika ada salah satu, keduanya harus valid)
+            if ((hari && !pekanKe) || (!hari && pekanKe)) {
+                 showMessage("Jika Hari atau Pekan ke- diisi, keduanya harus valid untuk mengaktifkan jadwal berulang.", 'error');
+                 return;
+            }
+
+
+            let base64ImageToSave = currentBase64Image;
+
+            if (imageFile.files.length > 0) {
+                try {
+                    base64ImageToSave = await fileToBase64(imageFile.files[0]);
+                } catch (error) {
+                    showMessage(`Gagal membaca file gambar: ${error.message}`, 'error');
+                    return;
+                }
+            }
+            
+            const draft = { 
+                category, 
+                title,
+                text, 
+                hari: hari || null, 
+                pekanKe: pekanKe || null, 
+                jam: jam || null, 
+                tanggalRencana: tanggalRencana || null, 
+                targetWaId: targetWaId || null, 
+                base64Image: base64ImageToSave,
+                timestamp: Date.now() 
+            };
+
+            if (id) { draft.id = id; }
+
+            try {
+                await saveDraft(draft);
+                const action = id ? 'diperbarui' : 'baru berhasil disimpan';
+                showMessage(`Draft '${title}' ${action}!`, 'success');
+                closeModal('draftModal'); // Tutup modal setelah simpan
+                await loadAndRenderDrafts(); // Muat ulang dan render
+            } catch (error) {
+                showMessage(`Gagal menyimpan draft: ${error.message}`, 'error');
+            }
+        });
+        
+        removeImageBtn.addEventListener('click', () => {
+            currentBase64Image = null;
+            imageFile.value = '';
+            imagePreviewImg.src = '';
+            currentImagePreview.classList.add('hidden');
+            showMessage("Gambar dihapus dari draft. Tekan Simpan untuk mengkonfirmasi.", 'success');
+        });
+        
+        /** Kustom pengganti window.confirm (tanpa menggunakan alert/confirm native) */
+        window.confirm = (message) => {
+            // Menggunakan prompt sederhana sebagai pengganti confirm
+            return window.prompt(message + " (Ketik 'Ya' untuk melanjutkan)", "Ya") === "Ya";
+        }
+
+
+        window.onload = async () => {
+            try {
+                await openDatabase();
+                await loadAndRenderDrafts();
+            } catch (error) {
+                // Diabaikan
+            }
+        };
+
+    </script>
+</body>
+</html>
+
